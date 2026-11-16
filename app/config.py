@@ -14,7 +14,7 @@ class Config:
     SCALER_PATH = SAVED_MODELS_DIR / 'feature_scaler.pkl'
     
     # Dataset Configuration
-    DATASET_PATH = BASE_DIR / 'ml_pipeline' / 'dataset' / 'sample_telemetry.csv'
+    DATASET_PATH = BASE_DIR / 'data' / 'engine_data.csv'
 
 class DevelopmentConfig(Config):
     DEBUG = True
