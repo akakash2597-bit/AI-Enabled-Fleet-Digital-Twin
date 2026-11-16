@@ -32,6 +32,25 @@ class RouteTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertIn(b"Predictive Maintenance & Failure Risk Alerts", res.data)
 
+    def test_interactive_predict_page_get(self):
+        res = self.client.get('/predict')
+        self.assertEqual(res.status_code, 200)
+        self.assertIn(b"AI Vehicle Failure Predictor & Diagnostic Tool", res.data)
+
+    def test_interactive_predict_page_post(self):
+        res = self.client.post('/predict', data={
+            'engine_rpm': '820',
+            'coolant_temp': '78.0',
+            'oil_pressure': '3.8',
+            'oil_temp': '76.5',
+            'fuel_pressure': '6.2',
+            'coolant_pressure': '2.4'
+        })
+        self.assertEqual(res.status_code, 200)
+        self.assertIn(b"Health Score", res.data)
+        self.assertIn(b"Estimated Remaining Useful Life", res.data)
+        self.assertIn(b"Plain-English Prediction Explanation", res.data)
+
     def test_api_predict(self):
         payload = {
             'Engine rpm': 800,

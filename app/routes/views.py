@@ -16,6 +16,7 @@ from app.models.db import (
     resolve_maintenance_ticket
 )
 from app.services.digital_twin import get_digital_twin
+from app.services.predictor import predictor
 
 views_bp = Blueprint('views', __name__)
 
@@ -92,6 +93,54 @@ def predictions():
         'predictions.html', 
         predictions=all_predictions, 
         tickets=tickets,
+        is_admin=is_admin()
+    )
+
+@views_bp.route('/predict', methods=['GET', 'POST'])
+def predict_interactive():
+    """
+    Interactive Vehicle Failure Prediction Page.
+    User enters vehicle sensor values -> Model predicts failure -> Displays:
+    - Health Score
+    - Failure Probability
+    - Risk Level
+    - Recommended Maintenance
+    - Estimated Remaining Life
+    - Detailed Plain-English Explanation
+    """
+    vehicles = get_all_vehicles()
+    prediction_result = None
+    input_values = {
+        'Engine rpm': 750,
+        'Lub oil pressure': 3.2,
+        'Fuel pressure': 6.5,
+        'Coolant pressure': 2.3,
+        'lub oil temp': 77.0,
+        'Coolant temp': 78.0
+    }
+
+    if request.method == 'POST':
+        try:
+            input_values = {
+                'Engine rpm': float(request.form.get('engine_rpm', 750)),
+                'Lub oil pressure': float(request.form.get('oil_pressure', 3.2)),
+                'Fuel pressure': float(request.form.get('fuel_pressure', 6.5)),
+                'Coolant pressure': float(request.form.get('coolant_pressure', 2.3)),
+                'lub oil temp': float(request.form.get('oil_temp', 77.0)),
+                'Coolant temp': float(request.form.get('coolant_temp', 78.0))
+            }
+            prediction_result = predictor.predict(input_values)
+        except Exception as e:
+            flash(f"Error parsing sensor values: {e}", 'danger')
+    else:
+        # Initial default prediction preview
+        prediction_result = predictor.predict(input_values)
+
+    return render_template(
+        'predict.html',
+        vehicles=vehicles,
+        input_values=input_values,
+        result=prediction_result,
         is_admin=is_admin()
     )
 

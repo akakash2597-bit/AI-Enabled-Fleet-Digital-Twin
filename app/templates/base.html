@@ -39,6 +39,7 @@
                 <li><a href="{{ url_for('views.index') }}" class="{% if request.endpoint == 'views.index' %}active{% endif %}">Overview</a></li>
                 <li><a href="{{ url_for('views.dashboard') }}" class="{% if request.endpoint == 'views.dashboard' %}active{% endif %}">Fleet Dashboard</a></li>
                 <li><a href="{{ url_for('views.vehicle_list') }}" class="{% if request.endpoint == 'views.vehicle_list' %}active{% endif %}">Vehicles</a></li>
+                <li><a href="{{ url_for('views.predict_interactive') }}" class="{% if request.endpoint == 'views.predict_interactive' %}active{% endif %}">AI Predictor</a></li>
                 <li><a href="{{ url_for('views.predictions') }}" class="{% if request.endpoint == 'views.predictions' %}active{% endif %}">Predictive Alerts</a></li>
                 
                 {% if is_admin %}

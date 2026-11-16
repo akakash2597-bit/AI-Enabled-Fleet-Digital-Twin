@@ -118,7 +118,21 @@ function updateDigitalTwinUI(data) {
     const recAction = document.getElementById('recActionText');
     if (recTitle && recAction) {
         recTitle.innerText = `Diagnosed: ${pred.suspect_component}`;
-        recAction.innerText = pred.recommended_action;
+        recAction.innerText = pred.recommended_maintenance || pred.recommended_action;
+    }
+
+    // 5. Estimated Remaining Life (RUL)
+    const rulEl = document.getElementById('twinRUL');
+    const rulNote = document.getElementById('twinRULNote');
+    if (rulEl && pred.estimated_remaining_life) {
+        rulEl.innerText = pred.estimated_remaining_life.formatted_display;
+        if (rulNote) rulNote.innerText = pred.estimated_remaining_life.urgency_text;
+    }
+
+    // 6. Plain-English Explanation
+    const explEl = document.getElementById('twinExplanationText');
+    if (explEl && pred.explanation) {
+        explEl.innerText = pred.explanation.summary_text.replace(/\*\*/g, '');
     }
 }
 

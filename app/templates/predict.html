@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+
+{% block title %}AI Predictive Failure Diagnostic - Fleet Digital Twin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="header-titles">
+        <h1 class="page-title">AI Vehicle Failure Predictor & Diagnostic Tool</h1>
+        <p class="page-subtitle">Input real-time or simulated sensor parameters to run Scikit-learn inference, estimate Remaining Useful Life, and receive plain-English explanations.</p>
+    </div>
+    <div class="header-actions">
+        <a href="{{ url_for('views.dashboard') }}" class="btn btn-outline">
+            <span>&larr; Fleet Dashboard</span>
+        </a>
+    </div>
+</div>
+
+<div class="grid grid-cols-2 predict-layout-grid">
+
+    <!-- Left Column: Input Form & Presets -->
+    <div class="glass-card predict-form-card">
+        <div class="panel-header">
+            <div>
+                <h3>1. Enter Telemetry Sensor Values</h3>
+                <p class="text-muted text-sm">Provide onboard engine ECU measurements or load demonstration presets</p>
+            </div>
+            <span class="badge badge-info">Input Layer</span>
+        </div>
+
+        <!-- Quick Demo Presets -->
+        <div class="preset-section">
+            <span class="text-xs text-muted font-bold uppercase">Quick Demo Presets:</span>
+            <div class="preset-pills-row">
+                <button type="button" class="preset-pill" onclick="loadFormPreset('nominal')">
+                    🟢 Healthy Cruise
+                </button>
+                <button type="button" class="preset-pill" onclick="loadFormPreset('overheat')">
+                    🔴 Thermal Overheat (135°C)
+                </button>
+                <button type="button" class="preset-pill" onclick="loadFormPreset('oil_starve')">
+                    🟡 Low Oil Pressure (0.8 bar)
+                </button>
+                <button type="button" class="preset-pill" onclick="loadFormPreset('fuel_surge')">
+                    🟣 High Fuel Pressure (18 bar)
+                </button>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('views.predict_interactive') }}" id="predictForm" class="sensor-entry-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="engine_rpm">Engine RPM (Rotational Speed)</label>
+                    <div class="input-unit-wrap">
+                        <input type="number" step="10" name="engine_rpm" id="engine_rpm" value="{{ input_values['Engine rpm'] | int }}" required>
+                        <span class="unit-tag">RPM</span>
+                    </div>
+                    <span class="field-hint">Nominal: 650 – 950 RPM</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="coolant_temp">Coolant Temperature</label>
+                    <div class="input-unit-wrap">
+                        <input type="number" step="0.1" name="coolant_temp" id="coolant_temp" value="{{ input_values['Coolant temp'] }}" required>
+                        <span class="unit-tag">°C</span>
+                    </div>
+                    <span class="field-hint">Nominal: 72 – 85 °C</span>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="oil_pressure">Lubrication Oil Pressure</label>
+                    <div class="input-unit-wrap">
+                        <input type="number" step="0.05" name="oil_pressure" id="oil_pressure" value="{{ input_values['Lub oil pressure'] }}" required>
+                        <span class="unit-tag">bar</span>
+                    </div>
+                    <span class="field-hint">Nominal: 2.5 – 4.5 bar</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="oil_temp">Lubrication Oil Temperature</label>
+                    <div class="input-unit-wrap">
+                        <input type="number" step="0.1" name="oil_temp" id="oil_temp" value="{{ input_values['lub oil temp'] }}" required>
+                        <span class="unit-tag">°C</span>
+                    </div>
+                    <span class="field-hint">Nominal: 74 – 82 °C</span>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="fuel_pressure">Fuel Injection Rail Pressure</label>
+                    <div class="input-unit-wrap">
+                        <input type="number" step="0.1" name="fuel_pressure" id="fuel_pressure" value="{{ input_values['Fuel pressure'] }}" required>
+                        <span class="unit-tag">bar</span>
+                    </div>
+                    <span class="field-hint">Nominal: 5.0 – 8.0 bar</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="coolant_pressure">Coolant Line Pressure</label>
+                    <div class="input-unit-wrap">
+                        <input type="number" step="0.05" name="coolant_pressure" id="coolant_pressure" value="{{ input_values['Coolant pressure'] }}" required>
+                        <span class="unit-tag">bar</span>
+                    </div>
+                    <span class="field-hint">Nominal: 1.8 – 2.8 bar</span>
+                </div>
+            </div>
+
+            <div class="form-submit-row">
+                <button type="submit" class="btn btn-primary btn-block large-btn">
+                    <span>⚡ Run AI Predictive Failure Analysis</span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Right Column: Model Output & Explainability Dashboard -->
+    <div class="predict-results-column">
+        {% if result %}
+        <div class="glass-card predict-output-card">
+            <div class="panel-header">
+                <div>
+                    <h3>2. AI Prediction & Diagnostic Output</h3>
+                    <p class="text-muted text-sm">Model: {{ result.model_used }}</p>
+                </div>
+                {% if result.risk_level == 'CRITICAL' %}
+                    <span class="badge badge-critical">CRITICAL RISK</span>
+                {% elif result.risk_level == 'HIGH' %}
+                    <span class="badge badge-critical" style="background: rgba(239, 68, 68, 0.2);">HIGH RISK</span>
+                {% elif result.risk_level == 'MEDIUM' %}
+                    <span class="badge badge-warning">MEDIUM RISK</span>
+                {% else %}
+                    <span class="badge badge-operational">LOW / SAFE</span>
+                {% endif %}
+            </div>
+
+            <!-- Primary Metric Gauges Grid -->
+            <div class="output-metrics-grid">
+                <!-- 1. Health Score -->
+                <div class="metric-box">
+                    <span class="metric-title">Health Score</span>
+                    <div class="metric-val-big {% if result.health_score < 40 %}text-danger{% elif result.health_score < 75 %}text-warning{% else %}text-success{% endif %}">
+                        {{ result.health_score }}%
+                    </div>
+                    <div class="health-progress-bar">
+                        <div class="health-progress-fill {% if result.health_score < 40 %}bg-danger{% elif result.health_score < 75 %}bg-warning{% else %}bg-success{% endif %}" 
+                             style="width: {{ result.health_score }}%;"></div>
+                    </div>
+                </div>
+
+                <!-- 2. Failure Probability -->
+                <div class="metric-box">
+                    <span class="metric-title">Failure Probability</span>
+                    <div class="metric-val-big {% if result.failure_risk_percentage >= 70 %}text-danger{% elif result.failure_risk_percentage >= 35 %}text-warning{% else %}text-success{% endif %}">
+                        {{ result.failure_risk_percentage }}%
+                    </div>
+                    <span class="text-xs text-muted">Risk Likelihood</span>
+                </div>
+
+                <!-- 3. Estimated Remaining Life -->
+                <div class="metric-box col-span-2 highlight-box">
+                    <div class="rul-header">
+                        <div>
+                            <span class="metric-title">Estimated Remaining Useful Life (RUL)</span>
+                            <div class="rul-val text-white">
+                                ⏳ {{ result.estimated_remaining_life.formatted_display }}
+                            </div>
+                        </div>
+                    </div>
+                    <p class="rul-urgency-note text-sm">
+                        {{ result.estimated_remaining_life.urgency_text }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Prescriptive Maintenance Advice -->
+            <div class="recommendation-card" style="margin-top: 1.25rem;">
+                <div class="rec-header">
+                    <span class="rec-icon">🔧</span>
+                    <div>
+                        <h4>Recommended Maintenance Action: {{ result.suspect_component }}</h4>
+                        <span class="text-xs text-muted">Target Subsystem: <strong>{{ result.suspect_component }}</strong></span>
+                    </div>
+                </div>
+                <p class="rec-text" style="margin-bottom: 0.75rem;">{{ result.recommended_maintenance }}</p>
+                
+                {% if result.maintenance_checklist %}
+                <div class="checklist-wrap">
+                    <span class="text-xs text-muted uppercase font-bold">Technician Action Items:</span>
+                    <ul class="checklist-items">
+                        {% for item in result.maintenance_checklist %}
+                        <li>{{ item }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Detailed Plain-English Explanation -->
+            <div class="explanation-box" style="margin-top: 1.25rem;">
+                <div class="explanation-header">
+                    <span class="explanation-icon">📖</span>
+                    <h4>Plain-English Prediction Explanation</h4>
+                </div>
+                <div class="explanation-body">
+                    <p class="explanation-summary">
+                        {{ result.explanation.summary_text | replace('**', '') }}
+                    </p>
+                </div>
+
+                <!-- Sensor Contribution Table -->
+                <div class="sensor-breakdown-wrap">
+                    <span class="text-xs text-muted uppercase font-bold">Sensor Parameter Analysis:</span>
+                    <div class="table-responsive" style="margin-top: 0.5rem;">
+                        <table class="data-table text-sm">
+                            <thead>
+                                <tr>
+                                    <th>Sensor</th>
+                                    <th>Value</th>
+                                    <th>Nominal Safe Band</th>
+                                    <th>Status</th>
+                                    <th>Diagnosis</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for s in result.explanation.sensor_details %}
+                                <tr>
+                                    <td><strong>{{ s.sensor_name }}</strong></td>
+                                    <td>{{ s.raw_value }} {{ s.unit }}</td>
+                                    <td class="text-muted">{{ s.nominal_range }}</td>
+                                    <td>
+                                        {% if 'Critical' in s.status %}
+                                            <span class="badge badge-critical">{{ s.status }}</span>
+                                        {% elif 'Warning' in s.status %}
+                                            <span class="badge badge-warning">{{ s.status }}</span>
+                                        {% else %}
+                                            <span class="badge badge-operational">Normal</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-xs text-muted">{{ s.analysis }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function loadFormPreset(type) {
+        const presets = {
+            'nominal': { rpm: 820, cooltemp: 78.0, oilpres: 3.8, oiltemp: 76.5, fuelpres: 6.2, coolpres: 2.4 },
+            'overheat': { rpm: 560, cooltemp: 135.0, oilpres: 1.9, oiltemp: 88.0, fuelpres: 7.2, coolpres: 0.8 },
+            'oil_starve': { rpm: 420, cooltemp: 86.0, oilpres: 0.8, oiltemp: 90.0, fuelpres: 5.8, coolpres: 1.8 },
+            'fuel_surge': { rpm: 980, cooltemp: 81.0, oilpres: 3.4, oiltemp: 77.0, fuelpres: 18.5, coolpres: 2.2 }
+        };
+
+        const target = presets[type];
+        if (!target) return;
+
+        document.getElementById('engine_rpm').value = target.rpm;
+        document.getElementById('coolant_temp').value = target.cooltemp;
+        document.getElementById('oil_pressure').value = target.oilpres;
+        document.getElementById('oil_temp').value = target.oiltemp;
+        document.getElementById('fuel_pressure').value = target.fuelpres;
+        document.getElementById('coolant_pressure').value = target.coolpres;
+
+        // Auto submit form to see output immediately
+        document.getElementById('predictForm').submit();
+    }
+</script>
+{% endblock %}

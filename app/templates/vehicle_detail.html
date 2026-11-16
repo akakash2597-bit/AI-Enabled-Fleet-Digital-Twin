@@ -46,7 +46,19 @@
             <div class="gauge-value-wrap">
                 <span class="gauge-number" id="twinRiskScore">{{ twin_state.failure_risk_percentage }}%</span>
             </div>
-            <span class="risk-pill large" id="twinSeverityPill">{{ twin_state.prediction.severity }} SEVERITY</span>
+            <span class="risk-pill large" id="twinSeverityPill">{{ twin_state.prediction.risk_level or twin_state.prediction.severity }} SEVERITY</span>
+        </div>
+
+        <div class="gauge-card">
+            <span class="gauge-label">Est. Remaining Life (RUL)</span>
+            <div class="gauge-value-wrap">
+                <span class="gauge-number" id="twinRUL" style="font-size: 1.25rem;">
+                    {{ twin_state.prediction.estimated_remaining_life.formatted_display if twin_state.prediction.estimated_remaining_life else '20,000 km' }}
+                </span>
+            </div>
+            <span class="text-xs text-muted" id="twinRULNote">
+                {{ twin_state.prediction.estimated_remaining_life.urgency_text if twin_state.prediction.estimated_remaining_life else 'Nominal operational envelope' }}
+            </span>
         </div>
     </div>
 </div>
@@ -170,7 +182,18 @@
                     <span class="text-xs text-muted" id="modelBadge">Model: {{ twin_state.prediction.model_used }}</span>
                 </div>
             </div>
-            <p class="rec-text" id="recActionText">{{ twin_state.prediction.recommended_action }}</p>
+            <p class="rec-text" id="recActionText">{{ twin_state.prediction.recommended_maintenance or twin_state.prediction.recommended_action }}</p>
+        </div>
+
+        <!-- Plain-English Explanation Box -->
+        <div class="explanation-card" id="twinExplanationBox" style="margin-top: 1rem; background: rgba(0, 0, 0, 0.35); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 1rem 1.25rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                <span style="font-size: 1.1rem;">📖</span>
+                <strong style="font-size: 0.92rem; color: var(--text-primary);">Plain-English Prediction Explanation</strong>
+            </div>
+            <p id="twinExplanationText" style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.55;">
+                {{ twin_state.prediction.explanation.summary_text if twin_state.prediction.explanation else 'Telemetry operating within standard baseline tolerances.' }}
+            </p>
         </div>
     </div>
 
