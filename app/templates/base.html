@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}AI Fleet Digital Twin{% endblock %} - Predictive Maintenance</title>
+    <title>{% block title %}AI Fleet Digital Twin{% endblock %} | Predictive Maintenance</title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     
     <!-- Base Stylesheets -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -20,26 +20,72 @@
     {% block extra_head %}{% endblock %}
 </head>
 <body>
-    <header>
+    <header class="app-header">
         <nav class="navbar">
             <a href="{{ url_for('views.index') }}" class="nav-brand">
-                <span>🚛 FleetTwin AI</span>
-                <span class="brand-badge">Digital Twin</span>
+                <span class="brand-icon">🚛</span>
+                <span class="brand-title">FleetTwin <span class="accent-text">AI</span></span>
+                <span class="brand-pill">Digital Twin</span>
             </a>
-            <ul class="nav-links">
-                <li><a href="{{ url_for('views.index') }}">Overview</a></li>
-                <li><a href="{{ url_for('views.dashboard') }}">Fleet Dashboard</a></li>
-                <li><a href="{{ url_for('views.predictions') }}">Predictive Alerts</a></li>
+
+            <!-- Mobile Hamburger Toggle -->
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <ul class="nav-links" id="navLinks">
+                <li><a href="{{ url_for('views.index') }}" class="{% if request.endpoint == 'views.index' %}active{% endif %}">Overview</a></li>
+                <li><a href="{{ url_for('views.dashboard') }}" class="{% if request.endpoint == 'views.dashboard' %}active{% endif %}">Fleet Dashboard</a></li>
+                <li><a href="{{ url_for('views.vehicle_list') }}" class="{% if request.endpoint == 'views.vehicle_list' %}active{% endif %}">Vehicles</a></li>
+                <li><a href="{{ url_for('views.predictions') }}" class="{% if request.endpoint == 'views.predictions' %}active{% endif %}">Predictive Alerts</a></li>
+                
+                {% if is_admin %}
+                    <li class="admin-item">
+                        <span class="admin-badge">Admin</span>
+                        <a href="{{ url_for('views.logout') }}" class="btn-logout" title="Sign out of Administrator Session">Logout</a>
+                    </li>
+                {% else %}
+                    <li>
+                        <a href="{{ url_for('views.login') }}" class="btn-login-link {% if request.endpoint == 'views.login' %}active{% endif %}">Admin Login</a>
+                    </li>
+                {% endif %}
             </ul>
         </nav>
     </header>
 
-    <main class="container">
+    <!-- Global Flash Notification Messages -->
+    <div class="flash-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        <span>{{ message }}</span>
+                        <button class="alert-close" onclick="this.parentElement.remove();">&times;</button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Dynamic Content -->
+    <main class="main-container">
         {% block content %}{% endblock %}
     </main>
 
-    <footer class="footer">
-        <p>&copy; 2026 AI-Enabled Fleet Digital Twin for Predictive Vehicle Maintenance | Final Year B.Tech Project (AI & DS)</p>
+    <footer class="app-footer">
+        <div class="footer-content">
+            <div class="footer-left">
+                <strong>AI-Enabled Fleet Digital Twin</strong> &bull; Predictive Vehicle Maintenance
+                <p class="footer-sub">Final Year B.Tech (Artificial Intelligence & Data Science) Project</p>
+            </div>
+            <div class="footer-right">
+                <span class="system-status">
+                    <span class="status-dot pulse-green"></span> ML Engine: Active & Synchronized
+                </span>
+            </div>
+        </div>
     </footer>
 
     <!-- Scripts -->

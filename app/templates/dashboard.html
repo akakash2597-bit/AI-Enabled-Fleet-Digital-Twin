@@ -1,50 +1,183 @@
 {% extends "base.html" %}
 
-{% block title %}Fleet Dashboard{% endblock %}
+{% block title %}Fleet Dashboard - AI Digital Twin{% endblock %}
 
 {% block content %}
-<div class="dashboard-header">
-    <div class="dashboard-title">
-        <h1>Fleet Digital Twin Dashboard</h1>
-        <p>Live health metrics, twin synchronization, and fleet status</p>
+<div class="page-header">
+    <div class="header-titles">
+        <h1 class="page-title">Fleet Operations Digital Twin Dashboard</h1>
+        <p class="page-subtitle">Continuous cyber-physical monitoring, telemetry aggregation, and predictive maintenance dispatch.</p>
+    </div>
+    <div class="header-actions">
+        <a href="{{ url_for('views.vehicle_list') }}" class="btn btn-secondary">
+            <span>🚛 View All Vehicles</span>
+        </a>
+        <a href="{{ url_for('views.predictions') }}" class="btn btn-primary">
+            <span>🚨 Active Alerts ({{ summary.active_alerts }})</span>
+        </a>
     </div>
 </div>
 
-<div class="metrics-grid">
-    <div class="metric-card">
-        <span class="metric-label">Total Connected Vehicles</span>
-        <span class="metric-value">5</span>
+<!-- KPI Metrics Grid -->
+<div class="grid grid-cols-4 stat-cards-row">
+    <div class="stat-card">
+        <div class="stat-icon icon-blue">🚚</div>
+        <div class="stat-info">
+            <span class="stat-label">Connected Vehicles</span>
+            <span class="stat-number">{{ summary.total_vehicles }}</span>
+            <span class="stat-trend text-muted">Active edge nodes</span>
+        </div>
     </div>
-    <div class="metric-card">
-        <span class="metric-label">Operational Vehicles</span>
-        <span class="metric-value" style="color: var(--status-success);">3</span>
+
+    <div class="stat-card">
+        <div class="stat-icon icon-green">💚</div>
+        <div class="stat-info">
+            <span class="stat-label">Operational (Nominal)</span>
+            <span class="stat-number text-success">{{ summary.operational_count }}</span>
+            <span class="stat-trend text-success">Healthy subsystems</span>
+        </div>
     </div>
-    <div class="metric-card">
-        <span class="metric-label">Vehicles in Warning State</span>
-        <span class="metric-value" style="color: var(--status-warning);">1</span>
+
+    <div class="stat-card">
+        <div class="stat-icon icon-amber">⚠️</div>
+        <div class="stat-info">
+            <span class="stat-label">Degradation Warning</span>
+            <span class="stat-number text-warning">{{ summary.warning_count }}</span>
+            <span class="stat-trend text-warning">Minor sensor anomalies</span>
+        </div>
     </div>
-    <div class="metric-card">
-        <span class="metric-label">High Risk / Critical</span>
-        <span class="metric-value" style="color: var(--status-danger);">1</span>
+
+    <div class="stat-card">
+        <div class="stat-icon icon-red">🛑</div>
+        <div class="stat-info">
+            <span class="stat-label">Critical Breakdown Risk</span>
+            <span class="stat-number text-danger">{{ summary.critical_count }}</span>
+            <span class="stat-trend text-danger">Immediate service required</span>
+        </div>
     </div>
 </div>
 
-<div class="charts-grid">
-    <div class="chart-card">
+<!-- Charts Section -->
+<div class="grid grid-cols-3 chart-dashboard-grid">
+    <!-- Fleet Health Distribution Donut -->
+    <div class="glass-card chart-card">
         <div class="chart-header">
-            <h3>Engine Temperature Trends (°C)</h3>
+            <div>
+                <h3>Fleet Health Breakdown</h3>
+                <p class="text-muted text-sm">Status distribution across active vehicles</p>
+            </div>
+            <span class="badge badge-info">Real-time</span>
         </div>
-        <div style="height: 280px;">
-            <canvas id="engineTempChart"></canvas>
+        <div class="chart-container-donut">
+            <canvas id="fleetHealthDonutChart"></canvas>
+        </div>
+        <div class="fleet-health-stats">
+            <div class="health-stat-item">
+                <span class="dot dot-green"></span>
+                <span>Operational: <strong>{{ summary.operational_count }}</strong></span>
+            </div>
+            <div class="health-stat-item">
+                <span class="dot dot-amber"></span>
+                <span>Warning: <strong>{{ summary.warning_count }}</strong></span>
+            </div>
+            <div class="health-stat-item">
+                <span class="dot dot-red"></span>
+                <span>Critical: <strong>{{ summary.critical_count }}</strong></span>
+            </div>
         </div>
     </div>
-    <div class="chart-card">
+
+    <!-- Fleet Telemetry Time-Series Chart -->
+    <div class="glass-card chart-card col-span-2">
         <div class="chart-header">
-            <h3>Vibration Spectrum Analysis (g)</h3>
+            <div>
+                <h3>Multi-Sensor Telemetry Trends</h3>
+                <p class="text-muted text-sm">Aggregated Engine RPM, Coolant Temperature, and Oil Pressure over recent operating cycles</p>
+            </div>
+            <div class="chart-legend-pills">
+                <span class="pill pill-red">Coolant Temp (°C)</span>
+                <span class="pill pill-blue">Oil Pressure (bar)</span>
+                <span class="pill pill-amber">Engine RPM (x100)</span>
+            </div>
         </div>
-        <div style="height: 280px;">
-            <canvas id="vibrationChart"></canvas>
+        <div class="chart-container-line">
+            <canvas id="fleetTelemetryLineChart"></canvas>
         </div>
+    </div>
+</div>
+
+<!-- Fleet Vehicle Priority Matrix -->
+<div class="glass-card table-section">
+    <div class="table-header-row">
+        <div>
+            <h3>Connected Fleet Vehicles Status</h3>
+            <p class="text-muted text-sm">Live digital twin health scores, failure probabilities, and fast navigation</p>
+        </div>
+        <a href="{{ url_for('views.vehicle_list') }}" class="btn btn-outline btn-sm">Full Fleet Roster &rarr;</a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Vehicle ID</th>
+                    <th>Model & Registration</th>
+                    <th>Operational Status</th>
+                    <th>Health Score</th>
+                    <th>Failure Probability</th>
+                    <th>Diagnosed Risk Component</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for v in vehicles %}
+                <tr>
+                    <td>
+                        <span class="vehicle-id-badge">{{ v.vehicle_id }}</span>
+                    </td>
+                    <td>
+                        <div class="vehicle-info-cell">
+                            <strong>{{ v.vehicle_model }}</strong>
+                            <span class="text-muted text-xs">{{ v.license_plate }} &bull; {{ v.total_mileage_km | round(1) }} km</span>
+                        </div>
+                    </td>
+                    <td>
+                        {% if v.current_status == 'Operational' %}
+                            <span class="badge badge-operational">Operational</span>
+                        {% elif v.current_status == 'Warning' %}
+                            <span class="badge badge-warning">Warning</span>
+                        {% else %}
+                            <span class="badge badge-critical">Critical Risk</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="health-progress-wrap">
+                            <div class="health-progress-bar">
+                                <div class="health-progress-fill {% if v.health_score < 40 %}bg-danger{% elif v.health_score < 75 %}bg-warning{% else %}bg-success{% endif %}" 
+                                     style="width: {{ v.health_score }}%;"></div>
+                            </div>
+                            <span class="health-score-val {% if v.health_score < 40 %}text-danger{% elif v.health_score < 75 %}text-warning{% else %}text-success{% endif %}">
+                                {{ v.health_score }}%
+                            </span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="risk-pill {% if v.latest_risk_score >= 0.70 %}risk-critical{% elif v.latest_risk_score >= 0.35 %}risk-warning{% else %}risk-normal{% endif %}">
+                            {{ (v.latest_risk_score * 100) | round(1) }}%
+                        </span>
+                    </td>
+                    <td>
+                        <span class="component-tag">{{ v.latest_component }}</span>
+                    </td>
+                    <td>
+                        <a href="{{ url_for('views.vehicle_detail', vehicle_id=v.vehicle_id) }}" class="btn btn-primary btn-sm">
+                            <span>Open Digital Twin</span>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 {% endblock %}
@@ -52,8 +185,14 @@
 {% block scripts %}
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        FleetCharts.initEngineTempChart('engineTempChart');
-        FleetCharts.initVibrationChart('vibrationChart');
+        // Initialize Fleet Donut
+        const operational = {{ summary.operational_count }};
+        const warning = {{ summary.warning_count }};
+        const critical = {{ summary.critical_count }};
+        FleetCharts.initHealthDonutChart('fleetHealthDonutChart', operational, warning, critical);
+
+        // Initialize Telemetry Line Chart
+        FleetCharts.initFleetTelemetryChart('fleetTelemetryLineChart');
     });
 </script>
 {% endblock %}

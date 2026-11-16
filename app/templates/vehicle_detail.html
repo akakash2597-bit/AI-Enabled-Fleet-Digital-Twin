@@ -1,35 +1,433 @@
 {% extends "base.html" %}
 
-{% block title %}Vehicle Digital Twin - {{ vehicle_id }}{% endblock %}
+{% block title %}Digital Twin - {{ vehicle.vehicle_id }} ({{ vehicle.vehicle_model }}){% endblock %}
 
 {% block content %}
-<div class="dashboard-header">
-    <div class="dashboard-title">
-        <h1>Digital Twin: {{ vehicle_id }}</h1>
-        <p>Real-time Subsystem Virtualization & Component Health</p>
+<!-- Top Vehicle Digital Twin Banner -->
+<div class="twin-header-card glass-card">
+    <div class="twin-title-block">
+        <div class="twin-badge-row">
+            <span class="vehicle-id-badge large">{{ vehicle.vehicle_id }}</span>
+            <span class="twin-sync-badge">
+                <span class="status-dot pulse-green"></span>
+                <span>Twin Synchronized (Physical &rarr; Virtual)</span>
+            </span>
+            {% if vehicle.current_status == 'Operational' %}
+                <span class="badge badge-operational" id="vehicleStatusBadge">Operational</span>
+            {% elif vehicle.current_status == 'Warning' %}
+                <span class="badge badge-warning" id="vehicleStatusBadge">Warning</span>
+            {% else %}
+                <span class="badge badge-critical" id="vehicleStatusBadge">Critical Risk</span>
+            {% endif %}
+        </div>
+        <h1 class="twin-vehicle-model">{{ vehicle.vehicle_model }}</h1>
+        <p class="text-muted text-sm">
+            Registration: <strong>{{ vehicle.license_plate }}</strong> &bull; 
+            Year: <strong>{{ vehicle.manufacture_year }}</strong> &bull; 
+            Odometer: <strong>{{ vehicle.total_mileage_km | round(1) }} km</strong> &bull; 
+            Last Workshop Service: <strong>{{ vehicle.last_service_date or 'Recent' }}</strong>
+        </p>
     </div>
-    <span class="badge badge-operational">Twin Synchronized</span>
+
+    <!-- Quick Health Summary Gauges -->
+    <div class="twin-kpi-gauges">
+        <div class="gauge-card">
+            <span class="gauge-label">Digital Twin Health</span>
+            <div class="gauge-value-wrap">
+                <span class="gauge-number" id="twinHealthScore">{{ twin_state.overall_health_score }}%</span>
+            </div>
+            <div class="health-progress-bar">
+                <div class="health-progress-fill" id="twinHealthFill" style="width: {{ twin_state.overall_health_score }}%;"></div>
+            </div>
+        </div>
+
+        <div class="gauge-card">
+            <span class="gauge-label">ML Failure Probability</span>
+            <div class="gauge-value-wrap">
+                <span class="gauge-number" id="twinRiskScore">{{ twin_state.failure_risk_percentage }}%</span>
+            </div>
+            <span class="risk-pill large" id="twinSeverityPill">{{ twin_state.prediction.severity }} SEVERITY</span>
+        </div>
+    </div>
 </div>
 
-<div class="metrics-grid">
-    <div class="metric-card">
-        <span class="metric-label">Vehicle ID</span>
-        <span class="metric-value" style="font-size: 1.5rem;">{{ vehicle_id }}</span>
+<!-- Main Twin Grid: Digital Twin Visualizer + Telemetry Simulator -->
+<div class="grid grid-cols-2 twin-main-grid">
+
+    <!-- 1. Digital Twin Subsystem 2D Virtualizer -->
+    <div class="glass-card subsystem-panel">
+        <div class="panel-header">
+            <div>
+                <h3>Subsystem Digital Twin Virtualization</h3>
+                <p class="text-muted text-sm">Real-time status decomposition across vehicle mechanical subsystems</p>
+            </div>
+            <span class="badge badge-info">Edge ECU Feed</span>
+        </div>
+
+        <div class="subsystems-container">
+            <!-- 1. Engine Core Assembly -->
+            <div class="subsystem-box" id="subsystem-engine">
+                <div class="subsystem-icon">⚙️</div>
+                <div class="subsystem-details">
+                    <div class="subsystem-top">
+                        <strong class="subsystem-name">Engine Assembly & Pistons</strong>
+                        <span class="subsystem-status-pill status-{{ twin_state.subsystems.engine_assembly.status|lower }}" id="status-engine">
+                            {{ twin_state.subsystems.engine_assembly.status }}
+                        </span>
+                    </div>
+                    <div class="health-bar-row">
+                        <div class="health-progress-bar">
+                            <div class="health-progress-fill bg-success" id="fill-engine" style="width: {{ twin_state.subsystems.engine_assembly.health }}%;"></div>
+                        </div>
+                        <span class="health-pct-text" id="pct-engine">{{ twin_state.subsystems.engine_assembly.health }}%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Cooling Circuit -->
+            <div class="subsystem-box" id="subsystem-cooling">
+                <div class="subsystem-icon">❄️</div>
+                <div class="subsystem-details">
+                    <div class="subsystem-top">
+                        <strong class="subsystem-name">Cooling Circuit & Radiator</strong>
+                        <span class="subsystem-status-pill status-{{ twin_state.subsystems.cooling_system.status|lower }}" id="status-cooling">
+                            {{ twin_state.subsystems.cooling_system.status }}
+                        </span>
+                    </div>
+                    <div class="health-bar-row">
+                        <div class="health-progress-bar">
+                            <div class="health-progress-fill bg-success" id="fill-cooling" style="width: {{ twin_state.subsystems.cooling_system.health }}%;"></div>
+                        </div>
+                        <span class="health-pct-text" id="pct-cooling">{{ twin_state.subsystems.cooling_system.health }}%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Lubrication & Oil Subsystem -->
+            <div class="subsystem-box" id="subsystem-lubrication">
+                <div class="subsystem-icon">🛢️</div>
+                <div class="subsystem-details">
+                    <div class="subsystem-top">
+                        <strong class="subsystem-name">Lubrication & Oil Pump</strong>
+                        <span class="subsystem-status-pill status-{{ twin_state.subsystems.lubrication_system.status|lower }}" id="status-lubrication">
+                            {{ twin_state.subsystems.lubrication_system.status }}
+                        </span>
+                    </div>
+                    <div class="health-bar-row">
+                        <div class="health-progress-bar">
+                            <div class="health-progress-fill bg-success" id="fill-lubrication" style="width: {{ twin_state.subsystems.lubrication_system.health }}%;"></div>
+                        </div>
+                        <span class="health-pct-text" id="pct-lubrication">{{ twin_state.subsystems.lubrication_system.health }}%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Fuel Injection Subsystem -->
+            <div class="subsystem-box" id="subsystem-fuel">
+                <div class="subsystem-icon">⛽</div>
+                <div class="subsystem-details">
+                    <div class="subsystem-top">
+                        <strong class="subsystem-name">Fuel Injection & Rail</strong>
+                        <span class="subsystem-status-pill status-{{ twin_state.subsystems.fuel_injection.status|lower }}" id="status-fuel">
+                            {{ twin_state.subsystems.fuel_injection.status }}
+                        </span>
+                    </div>
+                    <div class="health-bar-row">
+                        <div class="health-progress-bar">
+                            <div class="health-progress-fill bg-success" id="fill-fuel" style="width: {{ twin_state.subsystems.fuel_injection.health }}%;"></div>
+                        </div>
+                        <span class="health-pct-text" id="pct-fuel">{{ twin_state.subsystems.fuel_injection.health }}%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Transmission & Powertrain -->
+            <div class="subsystem-box" id="subsystem-transmission">
+                <div class="subsystem-icon">🔄</div>
+                <div class="subsystem-details">
+                    <div class="subsystem-top">
+                        <strong class="subsystem-name">Transmission & Drivetrain</strong>
+                        <span class="subsystem-status-pill status-{{ twin_state.subsystems.transmission.status|lower }}" id="status-transmission">
+                            {{ twin_state.subsystems.transmission.status }}
+                        </span>
+                    </div>
+                    <div class="health-bar-row">
+                        <div class="health-progress-bar">
+                            <div class="health-progress-fill bg-success" id="fill-transmission" style="width: {{ twin_state.subsystems.transmission.health }}%;"></div>
+                        </div>
+                        <span class="health-pct-text" id="pct-transmission">{{ twin_state.subsystems.transmission.health }}%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prescriptive Maintenance Box -->
+        <div class="recommendation-card" id="recommendationBox">
+            <div class="rec-header">
+                <span class="rec-icon">💡</span>
+                <div>
+                    <h4 id="recTitle">Diagnosed: {{ twin_state.prediction.suspect_component }}</h4>
+                    <span class="text-xs text-muted" id="modelBadge">Model: {{ twin_state.prediction.model_used }}</span>
+                </div>
+            </div>
+            <p class="rec-text" id="recActionText">{{ twin_state.prediction.recommended_action }}</p>
+        </div>
     </div>
-    <div class="metric-card">
-        <span class="metric-label">Overall Health Score</span>
-        <span class="metric-value" style="color: var(--status-success);">94%</span>
-    </div>
-    <div class="metric-card">
-        <span class="metric-label">Failure Probability</span>
-        <span class="metric-value" style="color: var(--status-info);">6.2%</span>
+
+    <!-- 2. Interactive Telemetry Simulator & Sliders -->
+    <div class="glass-card simulator-panel">
+        <div class="panel-header">
+            <div>
+                <h3>Live Telemetry Simulator</h3>
+                <p class="text-muted text-sm">Adjust sensor readings or choose demo presets to test real-time ML inference</p>
+            </div>
+            <span class="badge badge-warning">Interactive</span>
+        </div>
+
+        <!-- Preset Demonstration Buttons -->
+        <div class="preset-buttons-row">
+            <button class="preset-btn" onclick="applyPreset('normal')">
+                <span>🟢 Normal Highway Cruise</span>
+            </button>
+            <button class="preset-btn" onclick="applyPreset('overheating')">
+                <span>🔴 Thermal Runaway (140°C)</span>
+            </button>
+            <button class="preset-btn" onclick="applyPreset('oil_drop')">
+                <span>🟡 Oil Pressure Drop (0.8 bar)</span>
+            </button>
+            <button class="preset-btn" onclick="applyPreset('fuel_surge')">
+                <span>🟣 Fuel Rail Surge (18 bar)</span>
+            </button>
+        </div>
+
+        <form id="simulatorForm" class="simulator-sliders-grid" oninput="onTelemetryChange()">
+            <!-- Slider 1: Engine RPM -->
+            <div class="slider-group">
+                <div class="slider-header">
+                    <label>Engine RPM</label>
+                    <span class="slider-value" id="val-rpm">{{ twin_state.telemetry.rpm | round(0) | int }} RPM</span>
+                </div>
+                <input type="range" id="input-rpm" min="200" max="2200" step="10" value="{{ twin_state.telemetry.rpm | round(0) | int }}">
+                <div class="slider-range-labels">
+                    <span>200 (Stall)</span>
+                    <span>750 (Nominal)</span>
+                    <span>2200 (Max)</span>
+                </div>
+            </div>
+
+            <!-- Slider 2: Coolant Temp -->
+            <div class="slider-group">
+                <div class="slider-header">
+                    <label>Coolant Temperature (°C)</label>
+                    <span class="slider-value" id="val-cooltemp">{{ twin_state.telemetry.coolant_temp | round(1) }} °C</span>
+                </div>
+                <input type="range" id="input-cooltemp" min="60" max="180" step="0.5" value="{{ twin_state.telemetry.coolant_temp | round(1) }}">
+                <div class="slider-range-labels">
+                    <span>60°C</span>
+                    <span>78°C (Optimal)</span>
+                    <span>180°C (Critical)</span>
+                </div>
+            </div>
+
+            <!-- Slider 3: Lubrication Oil Pressure -->
+            <div class="slider-group">
+                <div class="slider-header">
+                    <label>Lubrication Oil Pressure (bar)</label>
+                    <span class="slider-value" id="val-oilpres">{{ twin_state.telemetry.oil_pressure | round(2) }} bar</span>
+                </div>
+                <input type="range" id="input-oilpres" min="0.1" max="7.0" step="0.05" value="{{ twin_state.telemetry.oil_pressure | round(2) }}">
+                <div class="slider-range-labels">
+                    <span>0.1 bar (Starvation)</span>
+                    <span>3.3 bar (Normal)</span>
+                    <span>7.0 bar</span>
+                </div>
+            </div>
+
+            <!-- Slider 4: Lubrication Oil Temp -->
+            <div class="slider-group">
+                <div class="slider-header">
+                    <label>Lubrication Oil Temp (°C)</label>
+                    <span class="slider-value" id="val-oiltemp">{{ twin_state.telemetry.oil_temp | round(1) }} °C</span>
+                </div>
+                <input type="range" id="input-oiltemp" min="70" max="95" step="0.5" value="{{ twin_state.telemetry.oil_temp | round(1) }}">
+                <div class="slider-range-labels">
+                    <span>70°C</span>
+                    <span>77°C (Nominal)</span>
+                    <span>95°C (High)</span>
+                </div>
+            </div>
+
+            <!-- Slider 5: Fuel Rail Pressure -->
+            <div class="slider-group">
+                <div class="slider-header">
+                    <label>Fuel Injection Pressure (bar)</label>
+                    <span class="slider-value" id="val-fuelpres">{{ twin_state.telemetry.fuel_pressure | round(2) }} bar</span>
+                </div>
+                <input type="range" id="input-fuelpres" min="1.0" max="21.0" step="0.2" value="{{ twin_state.telemetry.fuel_pressure | round(2) }}">
+                <div class="slider-range-labels">
+                    <span>1.0 bar (Clog)</span>
+                    <span>6.6 bar (Nominal)</span>
+                    <span>21.0 bar (Surge)</span>
+                </div>
+            </div>
+
+            <!-- Slider 6: Coolant Pressure -->
+            <div class="slider-group">
+                <div class="slider-header">
+                    <label>Coolant Line Pressure (bar)</label>
+                    <span class="slider-value" id="val-coolpres">{{ twin_state.telemetry.coolant_pressure | round(2) }} bar</span>
+                </div>
+                <input type="range" id="input-coolpres" min="0.1" max="7.0" step="0.1" value="{{ twin_state.telemetry.coolant_pressure | round(2) }}">
+                <div class="slider-range-labels">
+                    <span>0.1 bar (Leak)</span>
+                    <span>2.3 bar (Normal)</span>
+                    <span>7.0 bar</span>
+                </div>
+            </div>
+        </form>
+
+        <div class="simulator-actions">
+            <button type="button" class="btn btn-secondary btn-block" onclick="saveSimulatedReading('{{ vehicle.vehicle_id }}')">
+                <span>💾 Save Simulated Telemetry to Database</span>
+            </button>
+        </div>
     </div>
 </div>
 
-<div class="chart-card" style="margin-bottom: 2rem;">
-    <h3>Subsystem Digital Twin Virtualization</h3>
-    <p style="color: var(--text-secondary); margin-top: 0.5rem; font-size: 0.9rem;">
-        Interactive 2D schematic and subsystem breakdown (Engine, Braking, Cooling, Transmission) ready for feature implementation.
-    </p>
+<!-- Historical Telemetry Trends Chart -->
+<div class="glass-card chart-card" style="margin-top: 1.5rem;">
+    <div class="chart-header">
+        <div>
+            <h3>Telemetry Time-Series Log: {{ vehicle.vehicle_id }}</h3>
+            <p class="text-muted text-sm">Chronological sensor readings recorded from onboard ECU</p>
+        </div>
+        <div class="chart-legend-pills">
+            <span class="pill pill-red">Coolant Temp (°C)</span>
+            <span class="pill pill-blue">Oil Pressure (bar)</span>
+            <span class="pill pill-amber">Engine RPM (/10)</span>
+        </div>
+    </div>
+    <div style="height: 300px;">
+        <canvas id="vehicleDetailTelemetryChart"></canvas>
+    </div>
 </div>
+
+<!-- Maintenance History & Schedule Ticket Section -->
+<div class="glass-card table-section" style="margin-top: 1.5rem;">
+    <div class="table-header-row">
+        <div>
+            <h3>Maintenance History & Active Work Orders</h3>
+            <p class="text-muted text-sm">Scheduled periodic services, predictive alerts, and repair records</p>
+        </div>
+        {% if is_admin %}
+            <button class="btn btn-primary btn-sm" onclick="toggleScheduleModal()">
+                <span>➕ Schedule Maintenance</span>
+            </button>
+        {% endif %}
+    </div>
+
+    <!-- Admin Schedule Modal -->
+    {% if is_admin %}
+    <div id="scheduleModal" class="modal-backdrop" style="display: none;">
+        <div class="modal-card glass-card">
+            <div class="modal-header">
+                <h3>Schedule Maintenance for {{ vehicle.vehicle_id }}</h3>
+                <button class="modal-close" onclick="toggleScheduleModal()">&times;</button>
+            </div>
+            <form action="{{ url_for('views.admin_schedule_maintenance') }}" method="POST" class="modal-form">
+                <input type="hidden" name="vehicle_id" value="{{ vehicle.vehicle_id }}">
+                <div class="form-group">
+                    <label>Service Type</label>
+                    <select name="service_type">
+                        <option value="Predictive Alert">Predictive Failure Alert</option>
+                        <option value="Scheduled Periodic">Scheduled Periodic Maintenance</option>
+                        <option value="Emergency Repair">Emergency Breakdown Repair</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Target Date</label>
+                    <input type="date" name="scheduled_date" required>
+                </div>
+                <div class="form-group">
+                    <label>Technician Instructions & Notes</label>
+                    <textarea name="notes" rows="3" placeholder="e.g. Inspect radiator fan assembly, replace engine oil filter..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="toggleScheduleModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Work Order</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Ticket ID</th>
+                    <th>Service Type</th>
+                    <th>Scheduled Date</th>
+                    <th>Completed Date</th>
+                    <th>Status</th>
+                    <th>Technician Notes</th>
+                    {% if is_admin %}<th>Action</th>{% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% if tickets %}
+                    {% for t in tickets %}
+                    <tr>
+                        <td>#{{ t.id }}</td>
+                        <td><strong>{{ t.service_type }}</strong></td>
+                        <td>{{ t.scheduled_date }}</td>
+                        <td>{{ t.completed_date or '—' }}</td>
+                        <td>
+                            {% if t.status == 'Completed' %}
+                                <span class="badge badge-operational">Completed</span>
+                            {% elif t.status == 'In Progress' %}
+                                <span class="badge badge-warning">In Progress</span>
+                            {% else %}
+                                <span class="badge badge-info">Scheduled</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-sm text-muted">{{ t.technician_notes }}</td>
+                        {% if is_admin %}
+                        <td>
+                            {% if t.status != 'Completed' %}
+                            <form action="{{ url_for('views.admin_resolve_ticket', ticket_id=t.id) }}" method="POST">
+                                <button type="submit" class="btn btn-outline btn-sm text-success">Mark Completed</button>
+                            </form>
+                            {% else %}
+                            <span class="text-xs text-muted">Closed</span>
+                            {% endif %}
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted" style="padding: 2rem;">No maintenance logs on record for this vehicle.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const vehicleTelemetryHistory = {{ telemetry_history | tojson }};
+    const currentVehicleId = "{{ vehicle.vehicle_id }}";
+
+    document.addEventListener('DOMContentLoaded', () => {
+        FleetCharts.initVehicleDetailChart('vehicleDetailTelemetryChart', vehicleTelemetryHistory);
+    });
+
+    function toggleScheduleModal() {
+        const m = document.getElementById('scheduleModal');
+        if (m) m.style.display = m.style.display === 'none' ? 'flex' : 'none';
+    }
+</script>
 {% endblock %}

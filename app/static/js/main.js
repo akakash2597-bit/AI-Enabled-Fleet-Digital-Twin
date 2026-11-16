@@ -1,8 +1,28 @@
 /**
  * Main application client script.
- * General UI listeners and helpers.
+ * Handles mobile navigation toggle and global UI listeners.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("Fleet Digital Twin UI initialized.");
+    // Mobile navigation drawer toggle
+    const navToggle = document.getElementById('navToggle');
+    const navLinks = document.getElementById('navLinks');
+
+    if (navToggle && navLinks) {
+        navToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('show');
+        });
+    }
+
+    // Auto-dismiss flash alerts after 6 seconds
+    const alerts = document.querySelectorAll('.alert');
+    if (alerts.length > 0) {
+        setTimeout(() => {
+            alerts.forEach(alert => {
+                alert.style.transition = 'opacity 0.5s ease';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 500);
+            });
+        }, 6000);
+    }
 });

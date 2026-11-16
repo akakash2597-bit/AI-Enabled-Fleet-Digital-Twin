@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Login - Fleet Digital Twin{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-card glass-card">
+        <div class="login-header">
+            <div class="login-icon">🔒</div>
+            <h1 class="login-title">Fleet Administrator Portal</h1>
+            <p class="login-subtitle">Sign in to manage vehicles, schedule workshop work orders, and dispatch maintenance actions.</p>
+        </div>
+
+        <form action="{{ url_for('views.login') }}" method="POST" class="login-form">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <div class="input-with-icon">
+                    <span class="field-icon">👤</span>
+                    <input type="text" id="username" name="username" placeholder="e.g. admin" required autofocus autocomplete="username">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="input-with-icon">
+                    <span class="field-icon">🔑</span>
+                    <input type="password" id="password" name="password" placeholder="••••••••" required autocomplete="current-password">
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">
+                <span>Sign In as Administrator &rarr;</span>
+            </button>
+        </form>
+
+        <div class="login-hint">
+            <span class="hint-badge">Academic Demo Credentials</span>
+            <p>Username: <code>admin</code> &bull; Password: <code>admin123</code></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

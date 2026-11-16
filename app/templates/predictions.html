@@ -1,21 +1,155 @@
 {% extends "base.html" %}
 
-{% block title %}Predictive Maintenance Alerts{% endblock %}
+{% block title %}Predictive Maintenance Alerts - AI Digital Twin{% endblock %}
 
 {% block content %}
-<div class="dashboard-header">
-    <div class="dashboard-title">
-        <h1>Predictive Maintenance & Failure Risk Alerts</h1>
-        <p>Machine Learning failure predictions, component risks, and maintenance schedules</p>
+<div class="page-header">
+    <div class="header-titles">
+        <h1 class="page-title">Predictive Maintenance & Failure Risk Alerts</h1>
+        <p class="page-subtitle">Machine Learning early warning detections, risk severity triage, and automated technician recommendations.</p>
+    </div>
+    <div class="header-actions">
+        <a href="{{ url_for('views.dashboard') }}" class="btn btn-outline">
+            <span>&larr; Return to Dashboard</span>
+        </a>
     </div>
 </div>
 
-<div class="chart-card">
-    <div class="chart-header">
-        <h3>Active Failure Risk Alerts</h3>
+<!-- Active AI Failure Risk Alerts Table -->
+<div class="glass-card table-section">
+    <div class="table-header-row">
+        <div>
+            <h3>Active Machine Learning Anomaly Detections</h3>
+            <p class="text-muted text-sm">Real-time alerts triggered by Scikit-learn classification engine (Logistic Regression with Standardized Telemetry)</p>
+        </div>
+        <span class="badge badge-info">{{ predictions|length }} Predictions Logged</span>
     </div>
-    <p style="color: var(--text-secondary); font-size: 0.95rem;">
-        ML prediction alerts table and risk scores will be populated from the trained Scikit-learn model once features are approved and implemented.
-    </p>
+
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Vehicle ID</th>
+                    <th>Failure Probability</th>
+                    <th>Severity</th>
+                    <th>Suspect Component</th>
+                    <th>Actionable Maintenance Recommendation</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if predictions %}
+                    {% for p in predictions %}
+                    <tr>
+                        <td class="text-xs text-muted">{{ p.prediction_time }}</td>
+                        <td>
+                            <span class="vehicle-id-badge">{{ p.vehicle_id }}</span>
+                            <div class="text-xs text-muted">{{ p.vehicle_model }}</div>
+                        </td>
+                        <td>
+                            <strong class="{% if p.failure_risk_score >= 0.70 %}text-danger{% elif p.failure_risk_score >= 0.35 %}text-warning{% else %}text-success{% endif %}">
+                                {{ (p.failure_risk_score * 100) | round(1) }}%
+                            </strong>
+                        </td>
+                        <td>
+                            {% if p.severity_level == 'CRITICAL' %}
+                                <span class="badge badge-critical">CRITICAL</span>
+                            {% elif p.severity_level == 'HIGH' %}
+                                <span class="badge badge-critical" style="background: rgba(239, 68, 68, 0.2);">HIGH</span>
+                            {% elif p.severity_level == 'MEDIUM' %}
+                                <span class="badge badge-warning">MEDIUM</span>
+                            {% else %}
+                                <span class="badge badge-operational">LOW</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="component-tag">{{ p.predicted_failure_component }}</span>
+                        </td>
+                        <td class="text-sm">
+                            {{ p.recommended_action }}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('views.vehicle_detail', vehicle_id=p.vehicle_id) }}" class="btn btn-primary btn-sm">
+                                <span>Inspect Twin</span>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted" style="padding: 2rem;">No active failure predictions in log. All systems nominal.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Fleet Maintenance Service Tickets -->
+<div class="glass-card table-section" style="margin-top: 2rem;">
+    <div class="table-header-row">
+        <div>
+            <h3>Fleet-Wide Maintenance Work Orders</h3>
+            <p class="text-muted text-sm">Dispatched technician repair orders and service history</p>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Ticket #</th>
+                    <th>Vehicle</th>
+                    <th>Order Type</th>
+                    <th>Scheduled Date</th>
+                    <th>Completed Date</th>
+                    <th>Status</th>
+                    <th>Technician Notes</th>
+                    {% if is_admin %}<th>Action</th>{% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% if tickets %}
+                    {% for t in tickets %}
+                    <tr>
+                        <td>#{{ t.id }}</td>
+                        <td>
+                            <span class="vehicle-id-badge">{{ t.vehicle_id }}</span>
+                        </td>
+                        <td><strong>{{ t.service_type }}</strong></td>
+                        <td>{{ t.scheduled_date }}</td>
+                        <td>{{ t.completed_date or '—' }}</td>
+                        <td>
+                            {% if t.status == 'Completed' %}
+                                <span class="badge badge-operational">Completed</span>
+                            {% elif t.status == 'In Progress' %}
+                                <span class="badge badge-warning">In Progress</span>
+                            {% else %}
+                                <span class="badge badge-info">Scheduled</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-sm text-muted">{{ t.technician_notes }}</td>
+                        {% if is_admin %}
+                        <td>
+                            {% if t.status != 'Completed' %}
+                            <form action="{{ url_for('views.admin_resolve_ticket', ticket_id=t.id) }}" method="POST">
+                                <button type="submit" class="btn btn-outline btn-sm text-success">Mark Completed</button>
+                            </form>
+                            {% else %}
+                            <span class="text-xs text-muted">Closed</span>
+                            {% endif %}
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted" style="padding: 2rem;">No active maintenance tickets recorded.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
 </div>
 {% endblock %}
