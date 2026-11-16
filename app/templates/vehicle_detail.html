@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Vehicle Digital Twin - {{ vehicle_id }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="dashboard-title">
+        <h1>Digital Twin: {{ vehicle_id }}</h1>
+        <p>Real-time Subsystem Virtualization & Component Health</p>
+    </div>
+    <span class="badge badge-operational">Twin Synchronized</span>
+</div>
+
+<div class="metrics-grid">
+    <div class="metric-card">
+        <span class="metric-label">Vehicle ID</span>
+        <span class="metric-value" style="font-size: 1.5rem;">{{ vehicle_id }}</span>
+    </div>
+    <div class="metric-card">
+        <span class="metric-label">Overall Health Score</span>
+        <span class="metric-value" style="color: var(--status-success);">94%</span>
+    </div>
+    <div class="metric-card">
+        <span class="metric-label">Failure Probability</span>
+        <span class="metric-value" style="color: var(--status-info);">6.2%</span>
+    </div>
+</div>
+
+<div class="chart-card" style="margin-bottom: 2rem;">
+    <h3>Subsystem Digital Twin Virtualization</h3>
+    <p style="color: var(--text-secondary); margin-top: 0.5rem; font-size: 0.9rem;">
+        Interactive 2D schematic and subsystem breakdown (Engine, Braking, Cooling, Transmission) ready for feature implementation.
+    </p>
+</div>
+{% endblock %}

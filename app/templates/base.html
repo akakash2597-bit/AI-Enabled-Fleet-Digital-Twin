@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AI Fleet Digital Twin{% endblock %} - Predictive Maintenance</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Base Stylesheets -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="{{ url_for('views.index') }}" class="nav-brand">
+                <span>🚛 FleetTwin AI</span>
+                <span class="brand-badge">Digital Twin</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="{{ url_for('views.index') }}">Overview</a></li>
+                <li><a href="{{ url_for('views.dashboard') }}">Fleet Dashboard</a></li>
+                <li><a href="{{ url_for('views.predictions') }}">Predictive Alerts</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <p>&copy; 2026 AI-Enabled Fleet Digital Twin for Predictive Vehicle Maintenance | Final Year B.Tech Project (AI & DS)</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/digital_twin.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

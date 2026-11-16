@@ -1,0 +1,7 @@
+vehicle_id,timestamp,engine_temp_c,oil_pressure_psi,vibration_amplitude_g,coolant_temp_c,battery_voltage_v,engine_rpm,vehicle_speed_kmh,failure_occurred,failure_type
+VH-101,2026-03-01 10:00:00,88.5,42.1,0.12,85.0,13.8,2100,65.2,0,None
+VH-101,2026-03-01 10:15:00,89.1,41.8,0.14,86.2,13.7,2150,68.0,0,None
+VH-102,2026-03-01 10:00:00,99.4,31.2,0.38,98.5,12.9,2400,55.4,1,Cooling_System
+VH-103,2026-03-01 10:00:00,108.2,24.0,0.65,105.1,11.8,2800,48.0,1,Engine_Overheat
+VH-104,2026-03-01 10:00:00,86.0,44.5,0.10,84.0,14.1,1950,70.5,0,None
+VH-105,2026-03-01 10:00:00,87.4,43.0,0.11,85.5,13.9,2020,64.0,0,None

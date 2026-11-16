@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Predictive Maintenance Alerts{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="dashboard-title">
+        <h1>Predictive Maintenance & Failure Risk Alerts</h1>
+        <p>Machine Learning failure predictions, component risks, and maintenance schedules</p>
+    </div>
+</div>
+
+<div class="chart-card">
+    <div class="chart-header">
+        <h3>Active Failure Risk Alerts</h3>
+    </div>
+    <p style="color: var(--text-secondary); font-size: 0.95rem;">
+        ML prediction alerts table and risk scores will be populated from the trained Scikit-learn model once features are approved and implemented.
+    </p>
+</div>
+{% endblock %}

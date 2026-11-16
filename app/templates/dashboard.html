@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Fleet Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="dashboard-title">
+        <h1>Fleet Digital Twin Dashboard</h1>
+        <p>Live health metrics, twin synchronization, and fleet status</p>
+    </div>
+</div>
+
+<div class="metrics-grid">
+    <div class="metric-card">
+        <span class="metric-label">Total Connected Vehicles</span>
+        <span class="metric-value">5</span>
+    </div>
+    <div class="metric-card">
+        <span class="metric-label">Operational Vehicles</span>
+        <span class="metric-value" style="color: var(--status-success);">3</span>
+    </div>
+    <div class="metric-card">
+        <span class="metric-label">Vehicles in Warning State</span>
+        <span class="metric-value" style="color: var(--status-warning);">1</span>
+    </div>
+    <div class="metric-card">
+        <span class="metric-label">High Risk / Critical</span>
+        <span class="metric-value" style="color: var(--status-danger);">1</span>
+    </div>
+</div>
+
+<div class="charts-grid">
+    <div class="chart-card">
+        <div class="chart-header">
+            <h3>Engine Temperature Trends (°C)</h3>
+        </div>
+        <div style="height: 280px;">
+            <canvas id="engineTempChart"></canvas>
+        </div>
+    </div>
+    <div class="chart-card">
+        <div class="chart-header">
+            <h3>Vibration Spectrum Analysis (g)</h3>
+        </div>
+        <div style="height: 280px;">
+            <canvas id="vibrationChart"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        FleetCharts.initEngineTempChart('engineTempChart');
+        FleetCharts.initVibrationChart('vibrationChart');
+    });
+</script>
+{% endblock %}
