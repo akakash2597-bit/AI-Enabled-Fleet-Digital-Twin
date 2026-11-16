@@ -43,6 +43,11 @@ database/*.db
 # ML Model Binaries (trained artifacts)
 ml_pipeline/saved_models/*.pkl
 ml_pipeline/saved_models/*.joblib
+!ml_pipeline/saved_models/model.pkl
+!ml_pipeline/saved_models/scaler.pkl
+!ml_pipeline/saved_models/feature_scaler.pkl
+!ml_pipeline/saved_models/failure_prediction_model.pkl
+!ml_pipeline/saved_models/model_metadata.pkl
 !ml_pipeline/saved_models/.gitkeep
 
 # IDE / Editor Files
