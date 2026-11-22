@@ -173,8 +173,8 @@ AI-Enabled-Fleet-Digital-Twin/
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-username/fleet-digital-twin.git
-cd fleet-digital-twin
+git clone https://github.com/akakash2597-bit/AI-Enabled-Fleet-Digital-Twin.git
+cd AI-Enabled-Fleet-Digital-Twin
 
 # 2. Create and activate a virtual environment
 # Windows
