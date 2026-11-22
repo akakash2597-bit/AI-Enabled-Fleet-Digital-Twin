@@ -39,6 +39,7 @@ function onTelemetryChange() {
  * Sends current telemetry state to Flask /api/predict endpoint
  */
 async function executePrediction(telemetryPayload) {
+    if (typeof showTopLoader === 'function') showTopLoader();
     try {
         const response = await fetch('/api/predict', {
             method: 'POST',
@@ -55,6 +56,8 @@ async function executePrediction(telemetryPayload) {
         updateDigitalTwinUI(data);
     } catch (err) {
         console.error('Error contacting prediction engine:', err);
+    } finally {
+        if (typeof hideTopLoader === 'function') hideTopLoader();
     }
 }
 

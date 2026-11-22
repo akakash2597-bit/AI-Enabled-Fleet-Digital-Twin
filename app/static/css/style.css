@@ -664,3 +664,134 @@ body {
     .page-header { flex-direction: column; align-items: flex-start; }
     .form-row { grid-template-columns: 1fr; }
 }
+
+
+/* ==========================================================================
+   Loading Animations & Error Container Styles
+   ========================================================================== */
+
+/* Error Container */
+.error-container {
+    max-width: 680px;
+    margin: 4rem auto;
+    text-align: center;
+    padding: 3.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.error-badge {
+    display: inline-block;
+    padding: 0.35rem 0.9rem;
+    border-radius: 9999px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--primary);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.error-badge-danger {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--status-danger);
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.error-badge-warning {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--status-warning);
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+.error-title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.error-description {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1.6;
+    max-width: 520px;
+}
+
+.error-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* Spinner Animation */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.spinner {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
+    vertical-align: middle;
+}
+
+.btn-loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.85;
+}
+
+.btn-loading .btn-text {
+    visibility: hidden;
+}
+
+.btn-loading::after {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    top: 50%;
+    left: 50%;
+    margin-top: -9px;
+    margin-left: -9px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
+}
+
+/* Top Progress Shimmer Bar */
+.top-loader-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    width: 0%;
+    background: linear-gradient(90deg, #3b82f6, #06b6d4, #10b981);
+    z-index: 9999;
+    transition: width 0.3s ease, opacity 0.3s ease;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.8);
+}
+
+/* Skeleton Loading Shimmer */
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.skeleton {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.04) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.04) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.8s infinite;
+    border-radius: 4px;
+}

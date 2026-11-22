@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  fleet-digital-twin:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fleet_digital_twin_app
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_CONFIG=production
+      - SECRET_KEY=fleet-digital-twin-production-secret-key-change-me
+      - PORT=5000
+    volumes:
+      - ./database:/app/database
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/fleet/summary"]
+      interval: 30s
+      timeout: 5s
+      retries: 3

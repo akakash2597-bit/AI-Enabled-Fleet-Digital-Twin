@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}400 - Invalid Request Payload | Fleet Digital Twin{% endblock %}
+
+{% block content %}
+<div class="error-container glass-card">
+    <div class="error-badge error-badge-warning">Error 400</div>
+    <h1 class="error-title">Invalid Telemetry Data Format</h1>
+    <p class="error-description">
+        The sensor values or request parameters sent to the server do not match expected automotive engineering specifications. Please verify your inputs and try again.
+    </p>
+    <div class="error-actions">
+        <a href="{{ url_for('views.predict_interactive') }}" class="btn btn-primary">
+            <span>⚡ Open AI Predictor Tool</span>
+        </a>
+        <a href="{{ url_for('views.dashboard') }}" class="btn btn-outline">
+            <span>📊 Fleet Dashboard</span>
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -59,3 +59,9 @@ ml_pipeline/saved_models/*.joblib
 # OS Generated
 .DS_Store
 Thumbs.db
+
+# Logs
+logs/*.log
+*.log
+!logs/.gitkeep
+
