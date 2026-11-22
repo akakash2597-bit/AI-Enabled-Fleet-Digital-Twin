@@ -12,3 +12,7 @@ seaborn>=0.13.0
 
 # Environment Configuration
 python-dotenv>=1.0.0
+
+# Production WSGI Server (Linux/Render/Railway)
+gunicorn>=21.2.0; sys_platform != "win32"
+

@@ -7,6 +7,7 @@ from app import create_app
 
 env_name = os.environ.get('FLASK_CONFIG', 'production')
 application = create_app(env_name)
+app = application  # Alias for WSGI servers expecting 'app'
 
 if __name__ == '__main__':
     # Fallback development launcher
