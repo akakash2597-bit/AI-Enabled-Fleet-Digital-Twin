@@ -2,6 +2,7 @@
 
 <div align="center">
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Render-46E3B7?style=for-the-badge&logo=render&logoColor=black)](https://ai-enabled-fleet-digital-twin.onrender.com/)
 [![Python Version](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12%20%7C%203.13-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/Flask-3.0.0-000000?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
 [![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-1.4.0-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white)](https://scikit-learn.org/)
@@ -12,9 +13,22 @@
 **An End-to-End Cyber-Physical Fleet Monitoring, Telemetry Analytics & Predictive Maintenance System.**  
 *B.Tech Capstone Project in Artificial Intelligence & Data Science (AI & DS)*
 
-[🚀 Live Demo / Quickstart](#-quickstart-guide) • [📊 Model Benchmarks](#-machine-learning-benchmark) • [🏛️ System Architecture](#️-system-architecture) • [📖 Documentation](#-complete-documentation-hub) • [🔌 REST API](#-rest-api-reference)
+[🌐 Live Demo Website](https://ai-enabled-fleet-digital-twin.onrender.com/) • [🚀 Local Quickstart](#-quickstart-guide) • [📊 Model Benchmarks](#-machine-learning-benchmark) • [🏛️ System Architecture](#️-system-architecture) • [📖 Documentation](#-complete-documentation-hub) • [🔌 REST API](#-rest-api-reference)
 
 </div>
+
+---
+
+## 🌐 Live Cloud Deployment
+
+The application is deployed live in production on Render:
+
+- **Live Application URL**: [https://ai-enabled-fleet-digital-twin.onrender.com/](https://ai-enabled-fleet-digital-twin.onrender.com/)
+- **Fleet Command Center**: [https://ai-enabled-fleet-digital-twin.onrender.com/dashboard](https://ai-enabled-fleet-digital-twin.onrender.com/dashboard)
+- **Predictive Inference Engine**: [https://ai-enabled-fleet-digital-twin.onrender.com/predict](https://ai-enabled-fleet-digital-twin.onrender.com/predict)
+- **API Health Check Probe**: [https://ai-enabled-fleet-digital-twin.onrender.com/api/health](https://ai-enabled-fleet-digital-twin.onrender.com/api/health)
+
+---
 
 ---
 
